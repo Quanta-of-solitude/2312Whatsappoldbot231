@@ -29,6 +29,10 @@ def sms_ahoy_reply():
         elif keyword.startswith("repeat"):
             val = text[len("repeat")+3:]
             val = urllib.parse.unquote(val)
+        elif keyword == "joke":
+            jk = requests.get("{}".format(os.environ.get("jokesite")))
+            soup = BeautifulSoup(jk.content,'lxml')
+            val = soup.find("p", {"class": "subtitle"}).get_text()
         else:
             val = "Invalid '!' command, use !help for info! "
 
@@ -53,7 +57,8 @@ def help_menu():
     help = """*The Help menu for the bot is:*
 ```
 1. !commands: Get this help menu.
-2. !repeat [str]: return what you said.
+2. !joke: Get a Random JOKE!
+3. !repeat [str]: return what you said.
 
 For Eg: !repeat hey
 It will reply: hey
