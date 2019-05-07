@@ -1,11 +1,26 @@
-Old whatsapp bot,
+# WhatsApp Bot 
 
-made out of
+A simple whatsapp bot , made using flask and twilio free number.
 
+
+
+## Made on:
+```
 flask
 Twilio
+```
 
-Author Nyzex
+
+## Author:
+
+Nyzex
+
+## updates:
+
+ioT Support: Toggle
 
 
-Won't be updated
+
+```
+wont be updated much
+```
