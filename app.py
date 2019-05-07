@@ -6,6 +6,7 @@ import os
 from flask import Flask, request, redirect
 from twilio.twiml.messaging_response import Message, MessagingResponse
 import urllib
+import mqttPush #for nodeMCU
 import requests
 from bs4 import BeautifulSoup
 
@@ -21,18 +22,50 @@ def sms_ahoy_reply():
     query = urllib.parse.quote(request.form["Body"])
     text = query.replace(' ', '+')
 
+     #main commands
     if query.startswith("%21"):
         keyword = query[3:]
         keyword = keyword.lower()
         if keyword == "help":
             val = help_menu()
+
         elif keyword.startswith("repeat"):
             val = text[len("repeat")+3:]
             val = urllib.parse.unquote(val)
+
         elif keyword == "joke":
             jk = requests.get("{}".format(os.environ.get("jokesite")))
             soup = BeautifulSoup(jk.content,'lxml')
             val = soup.find("p", {"class": "subtitle"}).get_text()
+
+       #Interact with NODE MCU
+
+        elif keyword.startswith("node"):
+            try:
+                dataSent = text[len("node")+3:]
+                dataSent = urllib.parse.unquote(val)
+                data_sender = mqttPush.FruitSent("USERNAME","AIOKEY","FEEDNAME")
+                if dataSent == "1":
+                    try:
+                        data_sender.data_sent(1)
+                        val = "Toggle Switch on!"
+                    except Exception as e:
+                        print(e)
+                        val = "```Error API CONTACT```"
+                elif dataSent == "0":
+                    try:
+                        data_sender.data_sent(0)
+                        val = "Toggle Switch off!"
+                    except Exception as e:
+                        print(e)
+                        val = "```Error API CONTACT```"
+
+                else:
+                    val = "Invalid param, 0 or 1"
+            except Exception as e:
+                print(e)
+                val = "```Contact dev for details```"
+
         else:
             val = "Invalid '!' command, use !help for info! "
 
@@ -63,6 +96,10 @@ def help_menu():
 For Eg: !repeat hey
 It will reply: hey
 
+4. !node [0 or 1]: turn led on or off on node MCU/
+
+    to work: add AIOKEY USERNAME and FEEDNAME, also upload code to nodeMCU having the same feeds.
+    Currently works only on toggle buttons.
 
 You can talk to the bot like a person without using '!' prefix.
 Just text 'hi' to the bot!
@@ -73,7 +110,7 @@ Just text 'hi' to the bot!
 
 *More commands coming soon! I have an idea, and I might make it available soon!*
 
-*Made by  Nyzex*""")
+*Made by  Nyzex*"""
     return help
 
 
